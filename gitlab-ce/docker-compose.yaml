@@ -1,0 +1,24 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:17.0.6-ce.0  # replace with current version!
+    container_name: gitlab-ce
+    ports:
+      - '2424:22'
+    volumes:
+      - ./config:/etc/gitlab
+      - ./logs:/var/log/gitlab
+      - ./data:/var/opt/gitlab
+    shm_size: '256m'
+    networks:
+      - your-traefik-network  # replace with your network
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gitlab-https.rule=Host(`your-servers-dns-name`)  # replace with your server url
+      - traefik.http.routers.gitlab-https.entrypoints=websecure
+      - traefik.http.routers.gitlab-https.tls=true
+      - traefik.http.routers.gitlab-https.tls.certresolver=your-cert-resolver  # replace with your cert-resolvername
+      - traefik.http.services.gitlab-service.loadbalancer.server.port=80
+    restart: unless-stopped
+networks:
+  your-traefik-network:
+    external: true
